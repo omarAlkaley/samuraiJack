@@ -4,6 +4,8 @@ using UnityEngine;
 //this is just a box for storing some data
 public class FunnyCar : MonoBehaviour
 {
+    [SerializeField] ParticleSystem particleSystem;
+    [SerializeField] int score = 0;
     [SerializeField] Animator anime;
     [SerializeField] int omarSpeed = 100;
     [SerializeField] int steerSpeed = 80;
@@ -25,6 +27,18 @@ public class FunnyCar : MonoBehaviour
         Turn();
     }
     void Update(){
+        if(Input.GetAxis("Vertical")>0 || Input.GetAxis("Vertical") < 0)
+        {
+            Debug.Log("PlayParticalSystem");
+            if(!particleSystem.isPlaying)
+            particleSystem.Play();
+        }
+        else
+        {
+            Debug.Log("StopParticalSystem");
+            if (particleSystem.isPlaying)
+                particleSystem.Stop();
+        }
         if(Input.GetKeyDown(KeyCode.Tab))
         {
             anime.SetBool("isChangingColor",isPressingTab);
@@ -34,7 +48,7 @@ public class FunnyCar : MonoBehaviour
     void MoveCarForwardAndBackward()
     {
         //transform.Translate(new Vector3(0,Input.GetAxis("Vertical"),0)*omarSpeed*Time.deltaTime);
-        rigidBody.AddForce(transform.up * Input.GetAxis("Vertical")*omarSpeed*Time.fixedDeltaTime,ForceMode2D.Impulse);
+        rigidBody.MovePosition(rigidBody.position+(Vector2)transform.up * Input.GetAxis("Vertical")*omarSpeed*Time.fixedDeltaTime);
         if(Input.GetKeyDown(KeyCode.LeftShift)){
             omarSpeed=5;
         }
@@ -46,5 +60,12 @@ public class FunnyCar : MonoBehaviour
     {
         rigidBody.SetRotation(Quaternion.Euler(0,0,rigidBody.rotation+Input.GetAxis("Horizontal")*-1*steerSpeed*Time.fixedDeltaTime));
     }
-
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag == "CollectableCar")
+        {
+            score = score + 1;
+            Destroy(collision.gameObject);
+        }
+    }
 }
